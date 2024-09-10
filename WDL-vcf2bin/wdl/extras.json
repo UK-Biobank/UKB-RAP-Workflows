@@ -1,0 +1,21 @@
+{
+    "defaultTaskDxAttributes" : {
+      "runSpec": {
+          "executionPolicy": {
+            "restartOn": {
+              "*": 5
+            }
+          },
+          "timeoutPolicy": {
+            "*": {
+              "hours": 24
+            }
+          }
+        }
+    },
+    "defaultWorkflowDxAttributes": {
+        "scatterDefaults": {
+            "chunkSize": 1000
+        }
+    }
+  }
