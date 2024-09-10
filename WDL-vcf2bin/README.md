@@ -78,7 +78,7 @@ The smallest file size (1.55 MB) indicates that the pVCF file contains only a he
 This protocol is implemented as DNA Nexus workflow, and is available as a WDL file in the
 repository, along with additional documentation and Docker build files. Corresponding WDL task names are shown in square brackets. It takes a list of pVCF files (RAP file-IDs) for a single chromosome as an input (up to ~5000 pVCF files) and returns merged PLINK and BGEN files alongside validation outputs and a list of failed (~4GB or larger) pVCF lines.
 
-![Figure 2: Flow diagram representing RAP workflow (auto-generated from WDL).](fig2_schematic.png)
+![Figure 2: Flow diagram representing RAP workflow (auto-generated from WDL).](fig2_schematic.PNG)
 
 
 
@@ -94,7 +94,7 @@ Please note, you must have Java installed in a Linux work environment (e.g., loc
 
 #### **Main Steps**
 
-#### (i) Initialise all executables in this repo. \
+#### (i) Initialise all executables in this repo.
 From the root directory of this repo type this command in a Linux terminal: \
 `find ./ -name "*.sh" | xargs chmod a+x`
 
@@ -104,7 +104,7 @@ In your UKB-RAP Linux terminal, download three *GRCh38* reference genome files w
 
 These can be obtained from the following URL: https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/ - for example, by using the bash `wget` command. After downloading, place them in a directory in your RAP project. You can create directories on your RAP project space with the `dx mkdir` command (e.g. `dx mkdir hg38`). Then, upload the files to this location using the `dx upload` command. E.g., `dx upload GRCh38* --path hg38/`.
 
-#### (iii) Create and upload *Docker* container images to your RAP project: `build.sh` (x3) \
+#### (iii) Create and upload *Docker* container images to your RAP project: `build.sh` (x3)
 The repository contains three folders named *docker_\** alongside a file named *docker.env*.
 
 First, edit the *docker.env* file so the variable **REF** (currently set with a placeholder) points to the directory on the RAP where you have placed the *GRCh38* reference genome files (e.g. *hg38*). These reference genome files will be incorporated into one of the *Docker* images.
@@ -113,28 +113,28 @@ Next, set the variable **PTH** (currently set with a placeholder) to the directo
 
 Next, navigate to each *docker_\** folder. Run the build scripts in each folder: `./build.sh` - upon completion each script will upload a separate *Docker* image to the path you stipulated in *docker.env*.
 
-#### (iv) Compile the WDL on your RAP project: `compile_wdl.sh` \
+#### (iv) Compile the WDL on your RAP project: `compile_wdl.sh`
 You will require the *dxCompiler* utility: *https://github.com/dnanexus/dxCompiler/releases* - download it (you can use `wget` with the URL) and place in the folder named ***wdl***. This was tested (July 2024) using version *dxCompiler-2.11.5.jar*
 
 After navigating by terminal into the *wdl* folder, you will notice there are two environmental variables that you need to tailor within the accompanying file, *compile_wdl.env* (located in the *wdl* folder), according to your workflow: (i) the version of the *dxCompiler* jar file you are using (variable **DXC**; currently set as *dxCompiler-2.11.5.jar*); and (ii) the path on your RAP project where you wish the workflow to be located (**WDL_LOC**; currently set with a placeholder). When these are set simply run the compiler: `./compile_wdl.sh`
 
 
-#### (v) Prepare an input manifest file of files to be processed: `prep_manifest.sh` \
+#### (v) Prepare an input manifest file of files to be processed: `prep_manifest.sh`
 Navigate back by terminal into the main folder. To run this script you need to set environmental variables in the accompanying file, *prep_manifest.env*, with the UKB field (variable **FIELD**; currently set as "24304") and chromosome number (**CHR**; currently set as "21") of the VCFs you are working (NB script will list all held pVCFs for the field and chromosome you are processing), alongside the path to your *Docker* files (**PTH**; currently set with a placeholder) already uploaded to the RAP in section (i). Then run as: `./prep_manifest.sh`
 
 
-#### (vi) Run the workflow: `run.sh` \
+#### (vi) Run the workflow: `run.sh`
 The accompanying file *run.env* requires the chromosome number (variable **CHR**; currently set as "21"), the path to the WDL workflow on your RAP project (**WDL_LOC**; currently set with a placeholder), and the output files destination folder on your RAP project (**DEST**; currently set with a placeholder). Then, run your job: `./run.sh`
 
 
 ### **Programmatic outline of workflow**
 
-#### (i) Check if pVCF file has data (discard header-only, "empty" files) \
+#### (i) Check if pVCF file has data (discard header-only, "empty" files)
 `cat "~{vcf}" 2>/dev/null | zgrep "^[^#]" 2>/dev/null | head -1 | wc -l`
 
 This efficient bash script returns 1 if file has data and 0 if file is empty.
 
-#### (ii) Split multialleic variants and normalise pVCF \
+#### (ii) Split multialleic variants and normalise pVCF
 `bcftools norm "~{vcf}" \`
 \
 `-f /data/GRCh38_full_analysis_set_plus_decoy_hla.fa \`
@@ -153,7 +153,7 @@ This efficient bash script returns 1 if file has data and 0 if file is empty.
 
 This script uses a modified *BCFtools* binary to attempt to process the lines >2GB. If the line largely exceeds 2GB (~4GB or bigger) this script still fails and the pipe will fall back on standard *BCFtools* implementation (*bcftools_vanilla*). This script will omit problematic lines (reporting them to stdout, captured by workflow logging) and output the process file. Finally, "|| true" will guarantee the workflow will continue even if *BCFtools* return output to stderr. The workflow will only fail on no VCF file is produced, or conversion abnormalities are detected by the PLINK validation step.
 
-#### (iii) Convert normalized pVCF to PLINK \
+#### (iii) Convert normalized pVCF to PLINK
 `plink --make-bed \`
 \
 `--vcf "~{nornvcf}" \`
@@ -170,7 +170,7 @@ This script uses a modified *BCFtools* binary to attempt to process the lines >2
 \
 `--out "~{prefix}"`
 
-#### (iv) Validate PLINK file \
+#### (iv) Validate PLINK file
 `plink2 --validate --bed "~{bed}" --bim "~{bim}" --fam "~{fam}" > "~{prefix}".BedValid.txt`
 
 
